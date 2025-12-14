@@ -1,8 +1,8 @@
 from datetime import datetime
-
 from django.contrib.admin import display
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 # Create your models here.
@@ -66,6 +66,7 @@ class Team(Base):
 
 class Game(Base):
 
+    location = models.CharField("location", max_length=100, blank=True)
     game_date: datetime = models.DateTimeField(
         "game_date",
         auto_now_add=False,
@@ -85,7 +86,9 @@ class Game(Base):
     home_team_points = models.IntegerField("home_team_points", default=0)
 
     def __str__(self):
-        return f"{self.game_date.date()} - Home: {self.home_team.name} ({self.home_team_points}) - Away: {self.away_team.name} ({self.away_team_points})"
+        return f"{self.game_date.astimezone(timezone.get_current_timezone()).strftime(
+                "%Y-%m-%d %H:%M"
+            )} - Home: {self.home_team.name} ({self.home_team_points}) - Away: {self.away_team.name} ({self.away_team_points})"
 
     class Meta:
         db_table = 'mypicks"."game'

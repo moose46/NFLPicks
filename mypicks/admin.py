@@ -34,6 +34,11 @@ class GameAdmin(admin.ModelAdmin):
         "home_team_points",
         "away_team",
         "away_team_points",
+        "week_number",
     ]
     ordering = ["-game_date"]
-    fieldsets = (None,('fields':))
+    fieldsets = [
+        (None, {"fields": ["week_number", "game_date"]}),
+        ("@Home", {"fields": ["location", "home_team", "home_team_points"]}),
+        ("Visiting", {"fields": ["away_team", "away_team_points"]}),
+    ]
