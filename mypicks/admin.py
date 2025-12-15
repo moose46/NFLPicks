@@ -42,3 +42,4 @@ class GameAdmin(admin.ModelAdmin):
         ("@Home", {"fields": ["location", "home_team", "home_team_points"]}),
         ("Visiting", {"fields": ["away_team", "away_team_points"]}),
     ]
+    list_filter = ["week_number"]

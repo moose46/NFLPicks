@@ -4,21 +4,33 @@ from datetime import timedelta, timezone
 from sqlite3 import IntegrityError
 
 # from django.utils import timezone
-import pendulum
 from mypicks.models import Game, Team
 from pathlib import Path
 import os
-from zoneinfo import ZoneInfo
 
+# csv source file path
 NFL_GAMES = Path(__file__).parent / "nfl-2025-UTC.csv"
 
 
-def update_location(game, field_name):
-    game.location = field_name
-    game.save()
+def update_location(game: object, field_name: object) -> None:
+    """
+    If the game has a empty location field, update the game location
+    :param game:
+    :type game:
+    :param field_name:
+    :type field_name:
+    """
+    if game.location == "":
+        game.location = field_name
+        game.save()
 
 
-def add_game(new_game):
+def add_game(new_game: object) -> None:
+    """
+    Add a new game to the database
+    :param new_game:
+    :type new_game:
+    """
     print(f"Adding {new_game}")
     try:
         game = Game()
@@ -47,10 +59,13 @@ def add_game(new_game):
 
 
 def read_csv():
+    """
+    Reads nfl csv file
+    """
     with open(NFL_GAMES) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            # print(row["Home Team"], row["Away Team"])
+            print(row["Home Team"], row["Away Team"])
             try:
                 home_team = Team.objects.get(name__startswith=row["Home Team"])
                 away_team = Team.objects.get(name__startswith=row["Away Team"])
@@ -58,22 +73,22 @@ def read_csv():
                     home_team_id=home_team.id, away_team_id=away_team.id
                 )
                 if game:  # already entered into the database
+                    # if the location field is empty, update the location
                     if game[0].location == "":
                         print(game[0], row["Location"])
                         update_location(game[0], row["Location"])
                 else:  # insert the game into the database
                     add_game(row)
-                # for team in game:
-                #     print(team)
-                # print(
-                #     f"{row["Date"]} Home Team: {home_team.name} - Away Team: {away_team.name}"
-                # )
             except Team.DoesNotExist:
                 print(row["Home Team"])
                 exit()
 
 
 def run():
+    """
+    checks for the csv file and updates the database
+    :rtype: None
+    """
     if not os.path.exists(NFL_GAMES):
         print(f"NFL_GAMES {NFL_GAMES} not found.")
         exit()

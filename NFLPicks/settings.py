@@ -85,7 +85,7 @@ DATABASES = {
         "NAME": "NFLPicks",
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DATABASE_PASSWORD"),
-        "HOST": "localhost",
+        "HOST": "red-barn",
         "PORT": "5432",
         # "OPTIONS": {"options": "-c search_path=mypicks1"},
     }
