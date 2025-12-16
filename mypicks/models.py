@@ -73,8 +73,8 @@ class Stadium(Base):
     state = models.CharField("state", max_length=100, blank=True)
     website = models.URLField("website", max_length=100, blank=True)
 
-    # class Meta:
-    #     db_table = 'mypicks2"."stadium'
+    class Meta:
+        unique_together = ("name", "city", "state")
 
 
 class Game(Base):
