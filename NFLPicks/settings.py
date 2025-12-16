@@ -82,6 +82,7 @@ WSGI_APPLICATION = "NFLPicks.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
+        "OPTIONS": {"options": "-c search_path=mypicks2"},
         "NAME": "NFLPicks",
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DATABASE_PASSWORD"),

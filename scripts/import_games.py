@@ -1,28 +1,19 @@
 import csv
 import datetime
-from datetime import timedelta, timezone
+import pytz
+
+# from datetime import timedelta, timezone
 from sqlite3 import IntegrityError
 
-# from django.utils import timezone
+from django.core.management import CommandError
+
+from django.utils import timezone
 from mypicks.models import Game, Team
 from pathlib import Path
 import os
 
 # csv source file path
 NFL_GAMES = Path(__file__).parent / "nfl-2025-UTC.csv"
-
-
-def update_location(game: object, field_name: object) -> None:
-    """
-    If the game has a empty location field, update the game location
-    :param game:
-    :type game:
-    :param field_name:
-    :type field_name:
-    """
-    if game.location == "":
-        game.location = field_name
-        game.save()
 
 
 def add_game(new_game: object) -> None:
@@ -49,12 +40,13 @@ def add_game(new_game: object) -> None:
             game.home_team_points = int(new_game["Result"].split(sep="-")[0])
             game.away_team_points = int(new_game["Result"].split(sep="-")[1])
         except ValueError as e:
-            pass
+            print(e)
+            exit()
         game.save()
-        print(game)
+        # print(game)
 
     except IntegrityError as e:
-        print(f"Game with {new_game} {e}.")
+        print(f"Error .......... Game with {new_game} {e}.")
         exit()
 
 
@@ -69,18 +61,31 @@ def read_csv():
             try:
                 home_team = Team.objects.get(name__startswith=row["Home Team"])
                 away_team = Team.objects.get(name__startswith=row["Away Team"])
-                game = Game.objects.filter(
-                    home_team_id=home_team.id, away_team_id=away_team.id
-                )
-                if game:  # already entered into the database
-                    # if the location field is empty, update the location
-                    if game[0].location == "":
-                        print(game[0], row["Location"])
-                        update_location(game[0], row["Location"])
-                else:  # insert the game into the database
+                if (
+                    Game.objects.filter(home_team=home_team.id)
+                    .filter(away_team=away_team.id)
+                    # https://studygyaan.com/django/runtimewarning-datetimefield-received-naive-datetime-in-django-python
+                    .filter(
+                        game_date=timezone.make_aware(
+                            datetime.datetime.strptime(row["Date"], "%d/%m/%Y %H:%M"),
+                            timezone=pytz.timezone("US/Eastern"),
+                        )
+                        # game_date=row["Date"]
+                    )
+                    .exists()
+                ):
+                    continue
+                    # print(f"Error ........... {row}")
+                    # return
+                print(f"Inserting {row["Date"]} {row["Home Team"]}, {row["Away Team"]}")
+                try:
                     add_game(row)
+                except IntegrityError as e:
+                    CommandError("Already in the Database", row)
+                    print(e)
+                    exit()
             except Team.DoesNotExist:
-                print(row["Home Team"])
+                print(f"Error ........... {row["Home Team"]}")
                 exit()
 
 

@@ -30,6 +30,7 @@ class DivisionAdmin(admin.ModelAdmin):
 class GameAdmin(admin.ModelAdmin):
     list_display = [
         "game_date",
+        "location",
         "home_team",
         "home_team_points",
         "away_team",
@@ -43,3 +44,4 @@ class GameAdmin(admin.ModelAdmin):
         ("Visiting", {"fields": ["away_team", "away_team_points"]}),
     ]
     list_filter = ["week_number"]
+    search_fields = ["home_team__name", "away_team__name"]
